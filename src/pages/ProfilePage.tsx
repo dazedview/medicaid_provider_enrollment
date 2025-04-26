@@ -51,21 +51,20 @@ const ProfilePage = () => {
     }
   }, [user])
   
-  // If user data is not loaded yet, show loading
-  if (!userData || !formData) {
-    return <div className="loading-container">Loading profile data...</div>
-  }
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData({
-      ...formData,
-      [name]: value
-    })
+    if (formData) {
+      const { name, value } = e.target
+      setFormData({
+        ...formData,
+        [name]: value
+      })
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!formData) return
+    
     setError(null)
     setIsSubmitting(true)
     
@@ -94,17 +93,22 @@ const ProfilePage = () => {
       setUserData(updatedUser)
       setUser(updatedUser) // Update the user in the auth context
       setIsEditing(false)
-    } catch (error: any) {
-      console.error('Error updating profile:', error)
+    } catch (err: any) {
+      console.error('Error updating profile:', err)
       // Display error message
-      if (error.response && error.response.status === 401) {
+      if (err.response && err.response.status === 401) {
         setError('Authentication error. Please log out and log back in.')
       } else {
-        setError(error.message || 'Failed to update profile. Please try again.')
+        setError(err.message || 'Failed to update profile. Please try again.')
       }
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  // If user data is not loaded yet, show loading
+  if (!userData || !formData) {
+    return <div className="loading-container">Loading profile data...</div>
   }
 
   return (
@@ -204,7 +208,7 @@ const ProfilePage = () => {
                   type="text"
                   id="address"
                   name="address"
-                  value={formData.address}
+                  value={formData.address || ''}
                   onChange={handleChange}
                   required
                 />
@@ -217,7 +221,7 @@ const ProfilePage = () => {
                     type="text"
                     id="city"
                     name="city"
-                    value={formData.city}
+                    value={formData.city || ''}
                     onChange={handleChange}
                     required
                   />
@@ -229,7 +233,7 @@ const ProfilePage = () => {
                     type="text"
                     id="state"
                     name="state"
-                    value={formData.state}
+                    value={formData.state || ''}
                     onChange={handleChange}
                     required
                   />
@@ -241,7 +245,7 @@ const ProfilePage = () => {
                     type="text"
                     id="zipCode"
                     name="zipCode"
-                    value={formData.zipCode}
+                    value={formData.zipCode || ''}
                     onChange={handleChange}
                     required
                   />
@@ -254,7 +258,7 @@ const ProfilePage = () => {
                   type="tel"
                   id="phone"
                   name="phone"
-                  value={formData.phone}
+                  value={formData.phone || ''}
                   onChange={handleChange}
                   required
                 />

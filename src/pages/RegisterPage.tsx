@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { register, RegisterData } from '../services/auth'
+import { useAuth } from '../context/AuthContext'
 
 const RegisterPage = () => {
+  const { isAuthenticated, updateAuthState } = useAuth()
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -13,9 +15,17 @@ const RegisterPage = () => {
     npi: '',
     agreeToTerms: false
   })
+  const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
+  
+  // Redirect if user is already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/')
+    }
+  }, [isAuthenticated, navigate])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target
@@ -43,7 +53,9 @@ const RegisterPage = () => {
     // Call registration API
     try {
       setIsLoading(true)
-      await register(formData as RegisterData)
+      await register(formData as RegisterData, rememberMe)
+      // Update authentication state in context
+      updateAuthState()
       navigate('/')
     } catch (err: any) {
       setError(
@@ -105,6 +117,7 @@ const RegisterPage = () => {
               onChange={handleChange}
               placeholder="Enter your email"
               required
+              autoComplete="username"
             />
           </div>
           
@@ -174,6 +187,18 @@ const RegisterPage = () => {
             />
             <label htmlFor="agreeToTerms">
               I agree to the <Link to="/terms">Terms and Conditions</Link> and <Link to="/policy">Privacy Policy</Link>
+            </label>
+          </div>
+          
+          <div className="form-group checkbox-group">
+            <input
+              type="checkbox"
+              id="rememberMe"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+            />
+            <label htmlFor="rememberMe">
+              Remember me
             </label>
           </div>
           

@@ -5,9 +5,10 @@ const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth()
   const navigate = useNavigate()
 
-  const handleLogout = () => {
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault()
     logout()
-    navigate('/login')
+    // The logout function in AuthContext now handles the navigation
   }
 
   return (

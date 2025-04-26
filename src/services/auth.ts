@@ -53,46 +53,140 @@ export interface AuthResponse {
 }
 
 // Register user
-export const register = async (userData: RegisterData): Promise<AuthResponse> => {
-  const { confirmPassword, ...dataToSend } = userData;
+export const register = async (userData: RegisterData, rememberMe: boolean = false): Promise<AuthResponse> => {
+  console.log('Register attempt with:', { email: userData.email, rememberMe });
   
-  const response = await axios.post(`${API_URL}/auth/register`, dataToSend);
-  
-  if (response.data.success) {
-    localStorage.setItem('token', response.data.token);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
+  try {
+    // Clear any previous auth data before making the request
+    console.log('Clearing previous auth data');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
+    delete axios.defaults.headers.common['Authorization'];
+    
+    const { confirmPassword, ...dataToSend } = userData;
+    
+    console.log('Making register request to:', `${API_URL}/auth/register`);
+    const response = await axios.post(`${API_URL}/auth/register`, dataToSend);
+    console.log('Register response:', response.data);
+    
+    if (response.data.success) {
+      console.log('Registration successful, storing auth data');
+      if (rememberMe) {
+        // If "Remember Me" is checked, store in localStorage (persists after browser close)
+        console.log('Using localStorage for persistent login');
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      } else {
+        // Otherwise, use sessionStorage (cleared when browser is closed)
+        console.log('Using sessionStorage for session-only login');
+        sessionStorage.setItem('token', response.data.token);
+        sessionStorage.setItem('user', JSON.stringify(response.data.user));
+      }
+      
+      // Set the auth token in axios headers
+      console.log('Setting auth token in axios headers');
+      setAuthToken(response.data.token);
+      
+      // Return the response data
+      return response.data;
+    } else {
+      console.error('Registration failed:', response.data.error);
+      throw new Error(response.data.error || 'Registration failed');
+    }
+  } catch (error: any) {
+    // Clear any partial auth data on error
+    console.error('Registration error:', error.message, error.response?.data);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
+    delete axios.defaults.headers.common['Authorization'];
+    
+    throw error;
   }
-  
-  return response.data;
 };
 
 // Login user
-export const login = async (userData: LoginData): Promise<AuthResponse> => {
-  const response = await axios.post(`${API_URL}/auth/login`, userData);
+export const login = async (userData: LoginData, rememberMe: boolean = false): Promise<AuthResponse> => {
+  console.log('Login attempt with:', { email: userData.email, rememberMe });
   
-  if (response.data.success) {
-    localStorage.setItem('token', response.data.token);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
+  try {
+    // Clear any previous auth data before making the request
+    console.log('Clearing previous auth data');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
+    delete axios.defaults.headers.common['Authorization'];
+    
+    console.log('Making login request to:', `${API_URL}/auth/login`);
+    const response = await axios.post(`${API_URL}/auth/login`, userData);
+    console.log('Login response:', response.data);
+    
+    if (response.data.success) {
+      console.log('Login successful, storing auth data');
+      if (rememberMe) {
+        // If "Remember Me" is checked, store in localStorage (persists after browser close)
+        console.log('Using localStorage for persistent login');
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      } else {
+        // Otherwise, use sessionStorage (cleared when browser is closed)
+        console.log('Using sessionStorage for session-only login');
+        sessionStorage.setItem('token', response.data.token);
+        sessionStorage.setItem('user', JSON.stringify(response.data.user));
+      }
+      
+      // Set the auth token in axios headers
+      console.log('Setting auth token in axios headers');
+      setAuthToken(response.data.token);
+      
+      // Return the response data
+      return response.data;
+    } else {
+      console.error('Login failed:', response.data.error);
+      throw new Error(response.data.error || 'Login failed');
+    }
+  } catch (error: any) {
+    // Clear any partial auth data on error
+    console.error('Login error:', error.message, error.response?.data);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
+    delete axios.defaults.headers.common['Authorization'];
+    
+    throw error;
   }
-  
-  return response.data;
 };
 
 // Logout user
 export const logout = (): void => {
+  // Clear localStorage
   localStorage.removeItem('token');
   localStorage.removeItem('user');
+  
+  // Clear sessionStorage
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('user');
+  
+  // Clear any axios authorization headers
+  delete axios.defaults.headers.common['Authorization'];
 };
 
 // Get current user
 export const getCurrentUser = (): UserData | null => {
-  const user = localStorage.getItem('user');
+  // Try sessionStorage first, then fallback to localStorage
+  const user = sessionStorage.getItem('user') || localStorage.getItem('user');
   return user ? JSON.parse(user) : null;
 };
 
 // Get token
 export const getToken = (): string | null => {
-  return localStorage.getItem('token');
+  // Try sessionStorage first, then fallback to localStorage
+  return sessionStorage.getItem('token') || localStorage.getItem('token');
 };
 
 // Set auth token for API calls
@@ -122,9 +216,14 @@ export const updateProfile = async (profileData: UpdateProfileData): Promise<Use
   
   const response = await axios.put(`${API_URL}/auth/profile`, profileData);
   
-  // Update the user in localStorage
+  // Update the user data in the same storage that was used for authentication
   if (response.data) {
-    localStorage.setItem('user', JSON.stringify(response.data));
+    if (sessionStorage.getItem('token')) {
+      sessionStorage.setItem('user', JSON.stringify(response.data));
+    }
+    if (localStorage.getItem('token')) {
+      localStorage.setItem('user', JSON.stringify(response.data));
+    }
   }
   
   return response.data;
