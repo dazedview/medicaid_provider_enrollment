@@ -1,5 +1,7 @@
 # Medicaid Provider Enrollment Portal
 
+> **Note for Claude**: For a comprehensive overview of this codebase's structure and functionality, please refer to the CLAUDE.md file in this repository.
+
 A modern web application for healthcare providers to enroll in the Medicaid program.
 
 ## Features

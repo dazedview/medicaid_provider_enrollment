@@ -71,17 +71,47 @@ const EnrollmentForm = () => {
   const navigate = useNavigate()
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target
+    const { name, value } = e.target
     const isCheckbox = (e.target as HTMLInputElement).type === 'checkbox'
     
-    setFormData({
-      ...formData,
-      [name]: isCheckbox ? (e.target as HTMLInputElement).checked : value
-    })
+    // For NPI field, only allow digits and limit to 10 characters
+    if (name === 'npi') {
+      // Remove any non-digit characters
+      const digitsOnly = value.replace(/\D/g, '')
+      // Limit to 10 digits
+      const truncated = digitsOnly.slice(0, 10)
+      
+      setFormData({
+        ...formData,
+        [name]: truncated
+      })
+    } else {
+      setFormData({
+        ...formData,
+        [name]: isCheckbox ? (e.target as HTMLInputElement).checked : value
+      })
+    }
   }
 
   const nextStep = (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validate NPI and email on the first step (Provider Information)
+    if (currentStep === 0) {
+      const npiRegex = /^\d{10}$/
+      if (formData.npi && !npiRegex.test(formData.npi)) {
+        alert('NPI must be exactly 10 digits')
+        return
+      }
+      
+      // Email validation
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+      if (formData.email && !emailRegex.test(formData.email)) {
+        alert('Please enter a valid email address')
+        return
+      }
+    }
+    
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1)
       window.scrollTo(0, 0)
@@ -97,6 +127,20 @@ const EnrollmentForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Final validation before submission
+    const npiRegex = /^\d{10}$/
+    if (!npiRegex.test(formData.npi)) {
+      alert('NPI must be exactly 10 digits. Please correct this before submitting.')
+      return
+    }
+    
+    // Email validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    if (!emailRegex.test(formData.email)) {
+      alert('Please enter a valid email address before submitting.')
+      return
+    }
     
     try {
       // Submit the application to the API
