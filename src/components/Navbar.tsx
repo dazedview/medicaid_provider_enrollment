@@ -1,9 +1,12 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useState } from 'react'
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth()
-  const navigate = useNavigate()
+  const [adminMenuOpen, setAdminMenuOpen] = useState(false)
+  
+  const isAdmin = user?.role === 'admin'
 
   const handleLogout = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -36,6 +39,37 @@ const Navbar = () => {
                 <li>
                   <Link to="/profile">My Profile</Link>
                 </li>
+                
+                {isAdmin && (
+                  <li className="dropdown">
+                    <button 
+                      className="dropdown-toggle"
+                      onClick={() => setAdminMenuOpen(!adminMenuOpen)}
+                    >
+                      Admin <span className="caret"></span>
+                    </button>
+                    {adminMenuOpen && (
+                      <ul className="dropdown-menu">
+                        <li>
+                          <Link to="/admin" onClick={() => setAdminMenuOpen(false)}>
+                            Dashboard
+                          </Link>
+                        </li>
+                        <li>
+                          <Link to="/admin/users" onClick={() => setAdminMenuOpen(false)}>
+                            Users
+                          </Link>
+                        </li>
+                        <li>
+                          <Link to="/admin/applications" onClick={() => setAdminMenuOpen(false)}>
+                            Applications
+                          </Link>
+                        </li>
+                      </ul>
+                    )}
+                  </li>
+                )}
+                
                 <li>
                   <button className="btn btn-outline" onClick={handleLogout}>
                     Logout

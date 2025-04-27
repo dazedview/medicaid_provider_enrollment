@@ -28,6 +28,7 @@ testDbConnection();
 // Route files
 const auth = require('./routes/auth');
 const applications = require('./routes/applications');
+const admin = require('./routes/admin');
 
 const app = express();
 
@@ -45,6 +46,7 @@ if (process.env.NODE_ENV === 'development') {
 // Mount routers
 app.use('/api/auth', auth);
 app.use('/api/applications', applications);
+app.use('/api/admin', admin);
 
 // Root route
 app.get('/', (req, res) => {

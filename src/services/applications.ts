@@ -20,6 +20,24 @@ export interface Application {
   formData: any;
   createdAt: string;
   updatedAt: string;
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    organizationName: string;
+    npi: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    phone?: string;
+  };
+}
+
+export interface ApplicationStatusUpdate {
+  status: 'Pending' | 'In Review' | 'Approved' | 'Rejected';
+  notes?: string;
 }
 
 // Submit a new application
@@ -74,4 +92,60 @@ export const getApplicationById = async (id: string): Promise<Application> => {
   
   const response = await axios.get(`${API_URL}/applications/${id}`, config);
   return response.data;
+};
+
+// ADMIN FUNCTIONS
+
+// Get all applications (admin only)
+export const getAllApplications = async (): Promise<Application[]> => {
+  const token = getToken();
+  
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+  
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  };
+  
+  const response = await axios.get(`${API_URL}/admin/applications`, config);
+  return response.data;
+};
+
+// Get application by ID (admin view)
+export const getAdminApplicationById = async (id: string): Promise<Application> => {
+  const token = getToken();
+  
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+  
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  };
+  
+  const response = await axios.get(`${API_URL}/admin/applications/${id}`, config);
+  return response.data;
+};
+
+// Update application status (admin only)
+export const updateApplicationStatus = async (id: string, statusData: ApplicationStatusUpdate): Promise<Application> => {
+  const token = getToken();
+  
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+  
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  };
+  
+  const response = await axios.put(`${API_URL}/applications/${id}/status`, statusData, config);
+  return response.data.data;
 };
