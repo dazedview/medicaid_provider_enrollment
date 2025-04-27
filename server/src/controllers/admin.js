@@ -86,6 +86,53 @@ exports.getApplicationById = async (req, res) => {
   }
 };
 
+// @desc    Delete user by ID
+// @route   DELETE /api/admin/users/:id
+// @access  Private/Admin
+exports.deleteUser = async (req, res) => {
+  try {
+    const user = await User.findByPk(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Don't allow deleting yourself
+    if (user.id === req.user.id) {
+      return res.status(400).json({ error: 'You cannot delete your own account' });
+    }
+
+    // Delete the user
+    await user.destroy();
+
+    res.json({ success: true, message: 'User deleted successfully' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+// @desc    Delete application by ID
+// @route   DELETE /api/admin/applications/:id
+// @access  Private/Admin
+exports.deleteApplication = async (req, res) => {
+  try {
+    const application = await Application.findByPk(req.params.id);
+
+    if (!application) {
+      return res.status(404).json({ error: 'Application not found' });
+    }
+
+    // Delete the application
+    await application.destroy();
+
+    res.json({ success: true, message: 'Application deleted successfully' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 // @desc    Get application statistics
 // @route   GET /api/admin/stats
 // @access  Private/Admin

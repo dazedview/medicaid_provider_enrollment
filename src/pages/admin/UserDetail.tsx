@@ -1,13 +1,31 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { getUserById } from '../../services/admin';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { getUserById, deleteUser } from '../../services/admin';
 import { UserData } from '../../services/auth';
 
 const UserDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const handleDeleteUser = async () => {
+    if (!id) return;
+    
+    try {
+      setIsDeleting(true);
+      await deleteUser(id);
+      navigate('/admin/users', { state: { message: 'User deleted successfully' } });
+    } catch (err) {
+      console.error('Error deleting user:', err);
+      setError('Failed to delete user. Please try again.');
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -86,6 +104,32 @@ const UserDetail = () => {
         </div>
       </div>
 
+      {showDeleteConfirm && (
+        <div className="delete-confirmation">
+          <div className="delete-confirmation-content">
+            <h3>Confirm Delete</h3>
+            <p>Are you sure you want to delete this user? This action cannot be undone.</p>
+            <p><strong>Warning:</strong> Deleting this user will also delete all their applications.</p>
+            <div className="delete-confirmation-actions">
+              <button 
+                onClick={() => setShowDeleteConfirm(false)} 
+                className="btn btn-outline"
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleDeleteUser} 
+                className="btn btn-danger"
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete User'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="card">
         <h2>Personal Information</h2>
         <div className="detail-row">
@@ -149,6 +193,21 @@ const UserDetail = () => {
         <p>
           View all applications submitted by this provider in the Applications Management section.
         </p>
+      </div>
+
+      <div className="card danger-zone">
+        <h2>Danger Zone</h2>
+        <p>
+          Deleting this user will permanently remove their account and all associated data, including applications.
+          This action cannot be undone.
+        </p>
+        <button 
+          onClick={() => setShowDeleteConfirm(true)} 
+          className="btn btn-danger"
+          disabled={isDeleting}
+        >
+          Delete User
+        </button>
       </div>
     </div>
   );

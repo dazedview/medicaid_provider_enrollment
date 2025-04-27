@@ -1,15 +1,31 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { getAllUsers } from '../../services/admin';
 import { UserData } from '../../services/auth';
 
+interface LocationState {
+  message?: string;
+}
+
 const UserManagement = () => {
+  const location = useLocation();
   const [users, setUsers] = useState<UserData[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
+
+  useEffect(() => {
+    // Check for success message in location state
+    const state = location.state as LocationState;
+    if (state?.message) {
+      setSuccessMessage(state.message);
+      // Clear the location state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -96,6 +112,18 @@ const UserManagement = () => {
         <h1>User Management</h1>
         <p>View and manage registered users</p>
       </div>
+
+      {successMessage && (
+        <div className="success-message">
+          <p>{successMessage}</p>
+          <button 
+            onClick={() => setSuccessMessage(null)} 
+            className="close-button"
+          >
+            &times;
+          </button>
+        </div>
+      )}
 
       <div className="card">
         <div className="filters">

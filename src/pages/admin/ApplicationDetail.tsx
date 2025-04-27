@@ -1,21 +1,25 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   getAdminApplicationById, 
   updateApplicationStatus, 
   Application,
   ApplicationStatusUpdate 
 } from '../../services/applications';
+import { deleteApplication } from '../../services/admin';
 
 const ApplicationDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [application, setApplication] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     const fetchApplication = async () => {
@@ -46,6 +50,21 @@ const ApplicationDetail = () => {
   const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNotes(e.target.value);
     setUpdateSuccess(false);
+  };
+
+  const handleDeleteApplication = async () => {
+    if (!id) return;
+    
+    try {
+      setIsDeleting(true);
+      await deleteApplication(id);
+      navigate('/admin/applications', { state: { message: 'Application deleted successfully' } });
+    } catch (err) {
+      console.error('Error deleting application:', err);
+      setError('Failed to delete application. Please try again.');
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -129,6 +148,31 @@ const ApplicationDetail = () => {
           </Link>
         </div>
       </div>
+
+      {showDeleteConfirm && (
+        <div className="delete-confirmation">
+          <div className="delete-confirmation-content">
+            <h3>Confirm Delete</h3>
+            <p>Are you sure you want to delete this application? This action cannot be undone.</p>
+            <div className="delete-confirmation-actions">
+              <button 
+                onClick={() => setShowDeleteConfirm(false)} 
+                className="btn btn-outline"
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleDeleteApplication} 
+                className="btn btn-danger"
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Application'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="detail-grid">
         <div className="card application-info">
@@ -263,6 +307,21 @@ const ApplicationDetail = () => {
             </button>
           </div>
         </form>
+      </div>
+
+      <div className="card danger-zone">
+        <h2>Danger Zone</h2>
+        <p>
+          Deleting this application will permanently remove it from the system.
+          This action cannot be undone.
+        </p>
+        <button 
+          onClick={() => setShowDeleteConfirm(true)} 
+          className="btn btn-danger"
+          disabled={isDeleting}
+        >
+          Delete Application
+        </button>
       </div>
     </div>
   );

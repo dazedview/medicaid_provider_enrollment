@@ -1,14 +1,30 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { getAllApplications, Application } from '../../services/applications';
 
+interface LocationState {
+  message?: string;
+}
+
 const ApplicationManagement = () => {
+  const location = useLocation();
   const [applications, setApplications] = useState<Application[]>([]);
   const [filteredApplications, setFilteredApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+
+  useEffect(() => {
+    // Check for success message in location state
+    const state = location.state as LocationState;
+    if (state?.message) {
+      setSuccessMessage(state.message);
+      // Clear the location state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   useEffect(() => {
     const fetchApplications = async () => {
@@ -97,6 +113,18 @@ const ApplicationManagement = () => {
         <h1>Application Management</h1>
         <p>View and manage provider enrollment applications</p>
       </div>
+
+      {successMessage && (
+        <div className="success-message">
+          <p>{successMessage}</p>
+          <button 
+            onClick={() => setSuccessMessage(null)} 
+            className="close-button"
+          >
+            &times;
+          </button>
+        </div>
+      )}
 
       <div className="card">
         <div className="filters">
