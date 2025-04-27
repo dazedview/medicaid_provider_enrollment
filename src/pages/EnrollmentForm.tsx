@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { submitApplication } from '../services/applications'
+import { formatPhoneNumber, formatEIN, stripNonDigits } from '../utils/formatters'
 
 const steps = [
   'Provider Information',
@@ -85,6 +86,30 @@ const EnrollmentForm = () => {
         ...formData,
         [name]: truncated
       })
+    } 
+    // For phone field, only allow digits and limit to 10 characters
+    else if (name === 'phone') {
+      // Remove any non-digit characters
+      const digitsOnly = value.replace(/\D/g, '')
+      // Limit to 10 digits
+      const truncated = digitsOnly.slice(0, 10)
+      
+      setFormData({
+        ...formData,
+        [name]: truncated
+      })
+    }
+    // For EIN field, only allow digits and limit to 9 characters
+    else if (name === 'ein') {
+      // Remove any non-digit characters
+      const digitsOnly = value.replace(/\D/g, '')
+      // Limit to 9 digits
+      const truncated = digitsOnly.slice(0, 9)
+      
+      setFormData({
+        ...formData,
+        [name]: truncated
+      })
     } else {
       setFormData({
         ...formData,
@@ -108,6 +133,22 @@ const EnrollmentForm = () => {
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
       if (formData.email && !emailRegex.test(formData.email)) {
         alert('Please enter a valid email address')
+        return
+      }
+      
+      // Phone validation
+      const phoneRegex = /^\d{10}$/
+      if (formData.phone && !phoneRegex.test(formData.phone)) {
+        alert('Phone number must be exactly 10 digits')
+        return
+      }
+    }
+    
+    // Validate EIN on the second step (Practice Information)
+    if (currentStep === 1) {
+      const einRegex = /^\d{9}$/
+      if (formData.ein && !einRegex.test(formData.ein)) {
+        alert('EIN must be exactly 9 digits')
         return
       }
     }
@@ -139,6 +180,20 @@ const EnrollmentForm = () => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
     if (!emailRegex.test(formData.email)) {
       alert('Please enter a valid email address before submitting.')
+      return
+    }
+    
+    // Phone validation
+    const phoneRegex = /^\d{10}$/
+    if (!phoneRegex.test(formData.phone)) {
+      alert('Phone number must be exactly 10 digits. Please correct this before submitting.')
+      return
+    }
+    
+    // EIN validation
+    const einRegex = /^\d{9}$/
+    if (!einRegex.test(formData.ein)) {
+      alert('EIN must be exactly 9 digits. Please correct this before submitting.')
       return
     }
     
@@ -286,11 +341,16 @@ const EnrollmentForm = () => {
                   type="tel"
                   id="phone"
                   name="phone"
-                  value={formData.phone}
+                  value={formData.phone ? formData.phone : ''}
                   onChange={handleInputChange}
                   required
                   placeholder="(XXX) XXX-XXXX"
                 />
+                {formData.phone && (
+                  <div className="input-help-text">
+                    Will be stored as: {formatPhoneNumber(formData.phone)}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -348,6 +408,11 @@ const EnrollmentForm = () => {
                 required
                 placeholder="XX-XXXXXXX"
               />
+              {formData.ein && (
+                <div className="input-help-text">
+                  Will be stored as: {formatEIN(formData.ein)}
+                </div>
+              )}
             </div>
             
             <h3>Practice Address</h3>
@@ -1008,7 +1073,7 @@ const EnrollmentForm = () => {
                   </div>
                   <div className="review-item">
                     <span className="review-label">Phone:</span>
-                    <span className="review-value">{formData.phone}</span>
+                    <span className="review-value">{formatPhoneNumber(formData.phone)}</span>
                   </div>
                 </div>
               </div>
@@ -1023,6 +1088,10 @@ const EnrollmentForm = () => {
                   <div className="review-item">
                     <span className="review-label">Business Name:</span>
                     <span className="review-value">{formData.businessName}</span>
+                  </div>
+                  <div className="review-item">
+                    <span className="review-label">EIN:</span>
+                    <span className="review-value">{formatEIN(formData.ein)}</span>
                   </div>
                   <div className="review-item">
                     <span className="review-label">Address:</span>

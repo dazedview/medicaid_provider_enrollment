@@ -29,6 +29,13 @@ router.post(
 
 router.get('/me', protect, getMe);
 
-router.put('/profile', protect, updateProfile);
+router.put(
+  '/profile',
+  [
+    check('phone', 'Phone number must be a 10-digit number').optional().isLength({ min: 10, max: 10 }).isNumeric()
+  ],
+  protect,
+  updateProfile
+);
 
 module.exports = router;

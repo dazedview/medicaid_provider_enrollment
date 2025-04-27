@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getUserById, deleteUser } from '../../services/admin';
 import { UserData } from '../../services/auth';
+import { formatPhoneNumber } from '../../utils/formatters';
 
 const UserDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -179,7 +180,7 @@ const UserDetail = () => {
         </div>
         <div className="detail-row">
           <div className="detail-label">Phone:</div>
-          <div className="detail-value">{user.phone || 'Not provided'}</div>
+          <div className="detail-value">{formatPhoneNumber(user.phone) || 'Not provided'}</div>
         </div>
       </div>
 

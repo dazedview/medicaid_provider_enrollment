@@ -58,7 +58,10 @@ const User = sequelize.define('user', {
   },
   phone: {
     type: DataTypes.STRING,
-    allowNull: true
+    allowNull: true,
+    validate: {
+      is: /^\d{10}$/
+    }
   },
   role: {
     type: DataTypes.ENUM('provider', 'admin'),

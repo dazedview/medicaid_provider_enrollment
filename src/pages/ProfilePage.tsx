@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { updateProfile, setAuthToken, getToken } from '../services/auth'
+import { formatPhoneNumber, stripNonDigits } from '../utils/formatters'
 
 // Define the type for our user data
 interface UserProfileData {
@@ -54,16 +55,37 @@ const ProfilePage = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (formData) {
       const { name, value } = e.target
-      setFormData({
-        ...formData,
-        [name]: value
-      })
+      
+      // For phone field, only allow digits and limit to 10 characters
+      if (name === 'phone') {
+        // Remove any non-digit characters
+        const digitsOnly = value.replace(/\D/g, '')
+        // Limit to 10 digits
+        const truncated = digitsOnly.slice(0, 10)
+        
+        setFormData({
+          ...formData,
+          [name]: truncated
+        })
+      } else {
+        setFormData({
+          ...formData,
+          [name]: value
+        })
+      }
     }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData) return
+    
+    // Validate phone number
+    const phoneRegex = /^\d{10}$/
+    if (formData.phone && !phoneRegex.test(formData.phone)) {
+      setError('Phone number must be exactly 10 digits')
+      return
+    }
     
     setError(null)
     setIsSubmitting(true)
@@ -261,7 +283,13 @@ const ProfilePage = () => {
                   value={formData.phone || ''}
                   onChange={handleChange}
                   required
+                  placeholder="(XXX) XXX-XXXX"
                 />
+                {formData.phone && formData.phone !== 'Not provided' && (
+                  <div className="input-help-text">
+                    Will be stored as: {formatPhoneNumber(formData.phone)}
+                  </div>
+                )}
               </div>
               
               <div className="form-actions">
@@ -300,7 +328,7 @@ const ProfilePage = () => {
                 </div>
                 <div className="detail-row">
                   <div className="detail-label">Phone:</div>
-                  <div className="detail-value">{userData.phone}</div>
+                  <div className="detail-value">{formatPhoneNumber(userData.phone)}</div>
                 </div>
               </div>
               
