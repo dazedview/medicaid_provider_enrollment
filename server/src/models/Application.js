@@ -36,6 +36,13 @@ const Application = sequelize.define('application', {
     type: DataTypes.TEXT,
     allowNull: true
   },
+  medicaidProviderId: {
+    type: DataTypes.STRING(11),
+    allowNull: true,
+    validate: {
+      len: [11, 11]
+    }
+  },
   formData: {
     type: DataTypes.JSON,
     allowNull: false

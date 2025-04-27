@@ -72,6 +72,16 @@ exports.getApplicationById = async (req, res) => {
   }
 };
 
+// Helper function to generate a random 11-digit Medicaid provider ID
+const generateMedicaidProviderId = () => {
+  // Generate a random 11-digit number
+  let id = '';
+  for (let i = 0; i < 11; i++) {
+    id += Math.floor(Math.random() * 10).toString();
+  }
+  return id;
+};
+
 // @desc    Update application status (admin only)
 // @route   PUT /api/applications/:id/status
 // @access  Private/Admin
@@ -97,6 +107,19 @@ exports.updateApplicationStatus = async (req, res) => {
       application.notes = notes;
     }
     application.statusUpdateDate = new Date();
+    
+    // If status is being set to Approved and no medicaidProviderId exists, generate one
+    if (status === 'Approved' && !application.medicaidProviderId) {
+      // Check if medicaidProviderId exists in formData
+      const formData = application.formData;
+      if (formData && formData.medicaidProviderId && formData.medicaidProviderId.length === 11) {
+        // Use the medicaidProviderId from the formData
+        application.medicaidProviderId = formData.medicaidProviderId;
+      } else {
+        // Generate a new medicaidProviderId
+        application.medicaidProviderId = generateMedicaidProviderId();
+      }
+    }
     
     await application.save();
 

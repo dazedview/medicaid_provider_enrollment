@@ -17,6 +17,7 @@ export interface Application {
   submittedDate: string;
   statusUpdateDate: string;
   notes: string;
+  medicaidProviderId?: string;
   formData: any;
   createdAt: string;
   updatedAt: string;

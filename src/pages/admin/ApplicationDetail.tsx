@@ -157,6 +157,12 @@ const ApplicationDetail = () => {
               </span>
             </div>
           </div>
+          {application.status === 'Approved' && application.medicaidProviderId && (
+            <div className="detail-row">
+              <div className="detail-label">Medicaid Provider ID:</div>
+              <div className="detail-value highlight-value">{application.medicaidProviderId}</div>
+            </div>
+          )}
         </div>
 
         <div className="card provider-info">

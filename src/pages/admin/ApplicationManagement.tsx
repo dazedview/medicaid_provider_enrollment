@@ -141,6 +141,7 @@ const ApplicationManagement = () => {
                   <th>Type</th>
                   <th>Submitted</th>
                   <th>Status</th>
+                  <th>Medicaid ID</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -160,6 +161,13 @@ const ApplicationManagement = () => {
                       <span className={`status-badge status-${app.status.toLowerCase().replace(' ', '-')}`}>
                         {app.status}
                       </span>
+                    </td>
+                    <td>
+                      {app.status === 'Approved' && app.medicaidProviderId ? (
+                        <span className="highlight-value">{app.medicaidProviderId}</span>
+                      ) : (
+                        '-'
+                      )}
                     </td>
                     <td>
                       <Link 
