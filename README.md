@@ -52,7 +52,18 @@ cd ..
 
 4. Database Setup
    - Create a PostgreSQL database named 'medicaid_provider'
-   - Update database credentials in `server/.env` if needed (default is using your system username)
+   - Create a `server/.env` file with the following variables:
+     ```
+     NODE_ENV=development
+     PORT=5001
+     DB_NAME=medicaid_provider
+     DB_USER=your_db_username
+     DB_PASSWORD=your_db_password
+     DB_HOST=localhost
+     DB_PORT=5432
+     JWT_SECRET=your_jwt_secret
+     JWT_EXPIRE=30d
+     ```
    - The application will automatically create the necessary tables on startup
 
 ### Running the Application
@@ -69,7 +80,7 @@ cd medicaid-provider-enrollment
 npm run dev
 ```
 
-The frontend will be available at `http://localhost:3000` and the API at `http://localhost:5000`.
+The frontend will be available at `http://localhost:5173` (Vite's default port) and the API at `http://localhost:5001`.
 
 ## Development
 
@@ -83,11 +94,19 @@ The frontend will be available at `http://localhost:3000` and the API at `http:/
 
 ## Application Structure
 
-- `src/components` - Reusable UI components
+- `src/components` - Reusable UI components (Layout, Navbar, Footer, route protection)
+- `src/context` - React context providers (AuthContext for authentication)
 - `src/pages` - Page components that correspond to routes
-- `src/services` - API and service functions
+  - Regular user pages (Dashboard, EnrollmentForm, etc.)
+  - Admin pages in `src/pages/admin/` (AdminDashboard, UserManagement, etc.)
+- `src/services` - API service functions for auth, applications, and admin
 - `src/utils` - Utility functions and helpers
 - `src/styles` - Global styles and themes
+- `server/src/controllers` - Backend route controllers
+- `server/src/routes` - Express routes defining API endpoints
+- `server/src/models` - Sequelize models for database entities
+- `server/src/middleware` - Express middleware (including authentication)
+- `server/src/db` - Database setup, initialization, and migration
 
 ## Contributing
 

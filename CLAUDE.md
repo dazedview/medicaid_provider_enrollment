@@ -151,7 +151,9 @@ medicaid_provider_enrollment/
 
 1. User registers or logs in through the frontend
 2. Backend validates credentials and returns a JWT token
-3. Frontend stores the token in localStorage
+3. Frontend stores the token in either:
+   - localStorage (if "Remember Me" is checked) for persistent login across browser sessions
+   - sessionStorage (if "Remember Me" is not checked) for session-only login
 4. Token is included in the Authorization header for subsequent API requests
 5. Protected routes check for valid token using auth middleware
 
@@ -171,22 +173,24 @@ The application requires several environment variables:
 
 ```
 NODE_ENV=development
-PORT=5000
+PORT=5001
 DB_NAME=medicaid_provider
-DB_USER=postgres
-DB_PASSWORD=your_password
+DB_USER=your_db_username
+DB_PASSWORD=your_db_password
 DB_HOST=localhost
 DB_PORT=5432
 JWT_SECRET=your_jwt_secret
 JWT_EXPIRE=30d
 ```
 
+> **Note**: The `.env` file is not included in the repository and needs to be created manually. The above template provides the necessary variables.
+
 ## Development Workflow
 
 1. Start the backend server: `cd server && npm run dev`
 2. Start the frontend development server: `npm run dev`
 3. Access the application at http://localhost:5173 (Vite default)
-4. The API is available at http://localhost:5000
+4. The API is available at http://localhost:5001
 
 ## Common Tasks
 
