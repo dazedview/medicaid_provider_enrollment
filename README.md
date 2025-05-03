@@ -55,7 +55,7 @@ cd ..
    - Create a `server/.env` file with the following variables:
      ```
      NODE_ENV=development
-     PORT=5001
+     PORT=5002
      DB_NAME=medicaid_provider
      DB_USER=your_db_username
      DB_PASSWORD=your_db_password
@@ -80,7 +80,7 @@ cd medicaid-provider-enrollment
 npm run dev
 ```
 
-The frontend will be available at `http://localhost:5173` (Vite's default port) and the API at `http://localhost:5001`.
+The frontend will be available at `http://localhost:5174` and the API at `http://localhost:5002`.
 
 ## Development
 

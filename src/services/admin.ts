@@ -1,9 +1,8 @@
 import axios from 'axios';
 import { getToken } from './auth';
 import { UserData } from './auth';
-import { Application } from './applications';
 
-const API_URL = 'http://localhost:5001/api';
+const API_URL = 'http://localhost:5002/api';
 
 // Types
 export interface AdminStats {

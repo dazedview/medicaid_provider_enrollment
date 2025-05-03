@@ -173,7 +173,7 @@ The application requires several environment variables:
 
 ```
 NODE_ENV=development
-PORT=5001
+PORT=5002
 DB_NAME=medicaid_provider
 DB_USER=your_db_username
 DB_PASSWORD=your_db_password
@@ -189,8 +189,8 @@ JWT_EXPIRE=30d
 
 1. Start the backend server: `cd server && npm run dev`
 2. Start the frontend development server: `npm run dev`
-3. Access the application at http://localhost:5173 (Vite default)
-4. The API is available at http://localhost:5001
+3. Access the application at http://localhost:5174
+4. The API is available at http://localhost:5002
 
 ## Common Tasks
 
