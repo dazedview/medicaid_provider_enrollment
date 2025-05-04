@@ -25,7 +25,7 @@
     "eslint-plugin-react-hooks": "^4.6.0"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --open",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext .ts,.tsx",
